@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PAKwijzer — Persoonlijke Antipsychotica Keuzewijzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-text: #085041;
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.09);
+    --text: #1a1a18;
+    --muted: #6b6b66;
+    --hint: #a5a5a0;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1e1b;
+      --border: rgba(255,255,255,0.09);
+      --text: #f0efe8;
+      --muted: #9e9e98;
+      --hint: #5a5a55;
+      --green-light: #0a3d2e;
+      --green-text: #5DCAA5;
+    }
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 440px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .screen { display: none; flex: 1; flex-direction: column; padding: 1.5rem 1.25rem 2rem; }
+  .screen.active { display: flex; }
+
+  /* ── Intro screen ── */
+  .intro-hero {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 2rem; padding-bottom: 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .logo-pill {
+    background: var(--green); color: white;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px; letter-spacing: 0.5px;
+    padding: 8px 14px; border-radius: var(--radius-sm);
+  }
+  .app-title { font-size: 15px; font-weight: 500; line-height: 1.3; }
+  .app-sub { font-size: 12px; color: var(--muted); }
+
+  .intro-body { flex: 1; }
+  .intro-tagline {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px; line-height: 1.25;
+    color: var(--text); margin-bottom: 1rem;
+  }
+  .intro-tagline span { color: var(--green); }
+  .intro-p { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 0.75rem; }
+
+  .info-blocks { display: flex; flex-direction: column; gap: 8px; margin: 1.25rem 0; }
+  .info-block {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px;
+  }
+  .info-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--green-light); display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .info-icon svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .info-block-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .info-block-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 2px; }
+
+  .disclaimer-box {
+    background: var(--green-light); border-radius: var(--radius-sm);
+    padding: 10px 14px; font-size: 12px; color: var(--green-text);
+    line-height: 1.55; margin-top: 0.5rem;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 20px; border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.15s, transform 0.1s;
+    text-decoration: none; -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--green); color: white; border-color: var(--green); }
+  .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .btn:not(.btn-primary):hover { background: var(--bg); }
+  .nav-row { display: flex; gap: 10px; margin-top: 1.5rem; }
+  .nav-row .btn { flex: 1; }
+
+  /* ── Question screen ── */
+  .prog-wrap { margin-bottom: 1.25rem; }
+  .prog-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--hint); margin-bottom: 6px; }
+  .prog-track { height: 3px; background: var(--border); border-radius: 2px; }
+  .prog-fill { height: 3px; background: var(--green); border-radius: 2px; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
+
+  .q-section-tag {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--green); background: var(--green-light);
+    padding: 3px 9px; border-radius: 4px; margin-bottom: 0.75rem;
+  }
+  .q-card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem;
+    flex: 1; display: flex; flex-direction: column;
+  }
+  .q-label { font-size: 17px; font-weight: 500; line-height: 1.35; margin-bottom: 0.5rem; }
+  .q-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: auto; padding-bottom: 1.5rem; }
+
+  .slider-wrap { margin-top: 1rem; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--hint); margin-bottom: 8px; }
+  input[type=range] {
+    width: 100%; height: 4px; appearance: none; -webkit-appearance: none;
+    background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; -webkit-appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green); border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green); border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2); cursor: pointer;
+  }
+  .slider-val-display {
+    text-align: center; margin-top: 12px;
+    font-size: 13px; font-weight: 500; color: var(--green);
+    min-height: 20px;
+  }
+
+  /* ── Results screen ── */
+  .results-header { margin-bottom: 1.25rem; }
+  .results-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .results-sub { font-size: 13px; color: var(--muted); }
+  .result-item {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin-bottom: 10px; position: relative; overflow: hidden;
+    transition: transform 0.1s;
+  }
+  .result-item:active { transform: scale(0.99); }
+  .result-item.rank-1 { border-color: var(--green); border-width: 1.5px; }
+  .result-top-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green); color: white;
+    font-size: 11px; font-weight: 500; padding: 3px 10px;
+    border-radius: 4px; margin-bottom: 8px;
+  }
+  .result-row { display: flex; align-items: center; gap: 12px; }
+  .result-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--green); line-height: 1;
+    min-width: 32px;
+  }
+  .result-num.dim { color: var(--hint); }
+  .result-name { font-size: 16px; font-weight: 500; }
+  .result-bar-bg { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; }
+  .result-bar { height: 4px; border-radius: 2px; background: var(--green); transition: width 0.6s ease; }
+  .result-bar.dim { background: var(--hint); }
+  .results-disclaimer {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── Arrow SVG ── */
+  .arrow-icon { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Screen 0: Intro -->
+  <div id="s0" class="screen active">
+    <div class="intro-hero">
+      <div class="logo-pill">PAK</div>
+      <div>
+        <div class="app-title">PAKwijzer</div>
+        <div class="app-sub">Persoonlijke Antipsychotica Keuzewijzer</div>
+      </div>
+    </div>
+    <div class="intro-body">
+      <h1 class="intro-tagline">Welk middel past het beste bij <span>u</span>?</h1>
+      <p class="intro-p">De PAKwijzer helpt u bepalen welk antipsychoticum aansluit bij uw wensen — op basis van gewenste effecten en bijwerkingen die u (on)acceptabel vindt.</p>
+      <div class="info-blocks">
+        <div class="info-block">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="info-block-text"><strong>~5 minuten</strong>16 vragen over effecten en bijwerkingen</div>
+        </div>
+        <div class="info-block">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="info-block-text"><strong>Anoniem &amp; privé</strong>Uw antwoorden worden nergens opgeslagen</div>
+        </div>
+        <div class="info-block">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div class="info-block-text"><strong>Wetenschappelijk onderbouwd</strong>Gebaseerd op gepubliceerde meta-analyses</div>
+        </div>
+      </div>
+      <div class="disclaimer-box">
+        <strong>Let op:</strong> De PAKwijzer is een keuzehulpmiddel. Bespreek de uitkomst altijd met uw arts of psychiater voordat u een beslissing neemt.
+      </div>
+    </div>
+    <div class="nav-row" style="margin-top:1.5rem;">
+      <button class="btn btn-primary" onclick="startQuiz()">
+        Starten
+        <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Screen 1: Questions -->
+  <div id="s1" class="screen">
+    <div class="prog-wrap">
+      <div class="prog-meta">
+        <span id="stepLabel">Stap 1 van 16</span>
+        <span id="pctLabel">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+    <div class="q-section-tag" id="qSection">Effecten</div>
+    <div class="q-card">
+      <div class="q-label" id="qLabel">Vraag</div>
+      <div class="q-desc" id="qDesc">Beschrijving</div>
+      <div class="slider-wrap">
+        <div class="slider-labels">
+          <span id="qLeft">Links</span>
+          <span id="qRight">Rechts</span>
+        </div>
+        <input type="range" id="qSlider" min="0" max="4" value="2" step="1" oninput="onSlider()">
+        <div class="slider-val-display" id="qValDisplay">Neutraal</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn" id="backBtn" onclick="prevQ()">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Terug
+      </button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQ()">
+        Volgende
+        <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Results -->
+  <div id="s2" class="screen">
+    <div class="results-header">
+      <div class="results-title">Uw persoonlijke rangorde</div>
+      <div class="results-sub">Op basis van uw voorkeuren — bespreek dit met uw behandelaar</div>
+    </div>
+    <div class="results-disclaimer">
+      <strong>Keuzehulp, geen voorschrift.</strong> De uitkomst biedt geen garantie dat een antipsychoticum bij u effectief is of dat bijwerkingen niet optreden. Iedereen reageert anders op medicatie.
+    </div>
+    <div id="resultsList"></div>
+    <div class="nav-row">
+      <button class="btn" onclick="resetQuiz()">Opnieuw</button>
+      <button class="btn btn-primary" onclick="window.open('https://pakwijzer.nl','_blank')">Meer info</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  { section:"Gewenste effecten", label:"Effect op psychotische klachten", desc:"Hoe belangrijk vindt u het dat het middel goed werkt tegen psychotische klachten (zoals stemmen horen of wanen)?", leftLabel:"Niet belangrijk", rightLabel:"Zeer belangrijk", type:"effect", key:"psychose" },
+  { section:"Gewenste effecten", label:"Effect op depressieve klachten", desc:"Hoe belangrijk vindt u het dat het middel ook helpt bij depressieve gevoelens?", leftLabel:"Niet belangrijk", rightLabel:"Zeer belangrijk", type:"effect", key:"depressie" },
+  { section:"Gewenste effecten", label:"Effect op geheugen en concentratie", desc:"Hoe belangrijk vindt u het dat het middel uw geheugen en concentratie verbetert?", leftLabel:"Niet belangrijk", rightLabel:"Zeer belangrijk", type:"effect", key:"cognitie" },
+  { section:"Bijwerkingen", label:"Gewichtstoename", desc:"Hoe erg vindt u het als u aankomt in gewicht door het middel?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"gewicht" },
+  { section:"Bijwerkingen", label:"Seksuele disfuncties", desc:"Hoe erg vindt u het als het middel effect heeft op uw seksueel functioneren?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"seks" },
+  { section:"Bijwerkingen", label:"Sufheid", desc:"Hoe erg vindt u het als u zich suf of slaperig voelt door het middel?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"suf" },
+  { section:"Bijwerkingen", label:"Toegenomen slaapbehoefte", desc:"Hoe erg vindt u het als u meer slaap nodig heeft dan normaal?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"slaap" },
+  { section:"Bijwerkingen", label:"Bewegingsstoornissen", desc:"Hoe erg vindt u het als u last krijgt van stijfheid, trillingen of onrustige bewegingen?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"beweging" },
+  { section:"Bijwerkingen", label:"Waziger zien", desc:"Hoe erg vindt u het als uw zicht iets waziger wordt?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"zien" },
+  { section:"Bijwerkingen", label:"Lastiger plassen", desc:"Hoe erg vindt u het als plassen moeilijker gaat?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"plassen" },
+  { section:"Bijwerkingen", label:"Problemen met stoelgang", desc:"Hoe erg vindt u het als u last krijgt van obstipatie of andere darmproblemen?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"stoelgang" },
+  { section:"Bijwerkingen", label:"Droge mond", desc:"Hoe erg vindt u het als u een droge mond krijgt?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"monddroog" },
+  { section:"Bijwerkingen", label:"Meer speeksel produceren", desc:"Hoe erg vindt u het als u meer speeksel aanmaakt dan normaal?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"speeksel" },
+  { section:"Bijwerkingen", label:"Misselijkheid", desc:"Hoe erg vindt u het als u zich misselijk voelt door het middel?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"misselijk" },
+  { section:"Bijwerkingen", label:"Duizeligheid", desc:"Hoe erg vindt u het als u last heeft van duizeligheid?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"duizelig" },
+  { section:"Bijwerkingen", label:"Vervlakt affect", desc:"Hoe erg vindt u het als u emotioneel wat afgevlakt voelt — minder intense gevoelens ervaart?", leftLabel:"Acceptabel", rightLabel:"Onaanvaardbaar", type:"side", key:"affect" }
+];
+
+const scoreLabels = ["Volledig acceptabel / Niet belangrijk","Enigszins acceptabel / Weinig belangrijk","Neutraal","Tamelijk onaanvaardbaar / Tamelijk belangrijk","Onaanvaardbaar / Zeer belangrijk"];
+
+const drugs = {
+  "Aripiprazol":   { psychose:1, depressie:1, cognitie:0, gewicht:1, seks:1, suf:2, slaap:2, beweging:3, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:3, misselijk:2, duizelig:3, affect:1 },
+  "Olanzapine":    { psychose:2, depressie:2, cognitie:1, gewicht:3, seks:2, suf:4, slaap:4, beweging:2, zien:3, plassen:3, stoelgang:3, monddroog:3, speeksel:2, misselijk:1, duizelig:2, affect:1 },
+  "Clozapine":     { psychose:3, depressie:4, cognitie:0, gewicht:3, seks:1, suf:5, slaap:5, beweging:1, zien:4, plassen:4, stoelgang:4, monddroog:4, speeksel:5, misselijk:2, duizelig:3, affect:1 },
+  "Quetiapine":    { psychose:1, depressie:2, cognitie:1, gewicht:2, seks:1, suf:4, slaap:4, beweging:2, zien:2, plassen:2, stoelgang:2, monddroog:2, speeksel:3, misselijk:1, duizelig:3, affect:1 },
+  "Risperidon":    { psychose:1, depressie:1, cognitie:0, gewicht:2, seks:4, suf:3, slaap:3, beweging:5, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:1, misselijk:1, duizelig:3, affect:2 },
+  "Haloperidol":   { psychose:1, depressie:0, cognitie:0, gewicht:1, seks:3, suf:3, slaap:3, beweging:6, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:3, misselijk:1, duizelig:3, affect:2 },
+  "Amisulpiride":  { psychose:2, depressie:3, cognitie:0, gewicht:1, seks:3, suf:1, slaap:1, beweging:4, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:2, misselijk:1, duizelig:1, affect:2 },
+  "Lurasidon":     { psychose:1, depressie:0, cognitie:0, gewicht:1, seks:1, suf:3, slaap:3, beweging:5, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:3, misselijk:1, duizelig:2, affect:2 },
+  "Sulpiride":     { psychose:1, depressie:0, cognitie:0, gewicht:1, seks:3, suf:2, slaap:2, beweging:4, zien:1, plassen:1, stoelgang:1, monddroog:1, speeksel:3, misselijk:1, duizelig:2, affect:1 },
+  "Perphenazine":  { psychose:1, depressie:0, cognitie:0, gewicht:1, seks:3, suf:4, slaap:4, beweging:6, zien:2, plassen:2, stoelgang:2, monddroog:2, speeksel:3, misselijk:1, duizelig:3, affect:2 }
+};
+
+let answers = {}, curQ = 0;
+
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startQuiz() { curQ = 0; loadQ(0); goTo(1); }
+
+function onSlider() {
+  const v = parseInt(document.getElementById('qSlider').value);
+  document.getElementById('qValDisplay').textContent = scoreLabels[v];
+}
+
+function loadQ(idx) {
+  const q = questions[idx];
+  const pct = Math.round((idx / questions.length) * 100);
+  document.getElementById('stepLabel').textContent = 'Stap '+(idx+1)+' van '+questions.length;
+  document.getElementById('pctLabel').textContent = pct+'%';
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('qSection').textContent = q.section;
+  document.getElementById('qLabel').textContent = q.label;
+  document.getElementById('qDesc').textContent = q.desc;
+  document.getElementById('qLeft').textContent = q.leftLabel;
+  document.getElementById('qRight').textContent = q.rightLabel;
+  const saved = answers[q.key] !== undefined ? answers[q.key] : 2;
+  document.getElementById('qSlider').value = saved;
+  document.getElementById('qValDisplay').textContent = scoreLabels[saved];
+  document.getElementById('backBtn').style.display = idx === 0 ? 'none' : 'flex';
+  const nb = document.getElementById('nextBtn');
+  nb.innerHTML = idx === questions.length-1
+    ? 'Bekijk resultaat <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'
+    : 'Volgende <svg class="arrow-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+}
+
+function saveAns() {
+  answers[questions[curQ].key] = parseInt(document.getElementById('qSlider').value);
+}
+
+function nextQ() {
+  saveAns();
+  if (curQ < questions.length - 1) { curQ++; loadQ(curQ); }
+  else { showResults(); }
+}
+
+function prevQ() {
+  saveAns();
+  if (curQ > 0) { curQ--; loadQ(curQ); }
+}
+
+function showResults() {
+  const scores = {};
+  for (const drug in drugs) {
+    let total = 0;
+    questions.forEach(q => {
+      const w = answers[q.key] !== undefined ? answers[q.key] : 2;
+      const raw = drugs[drug][q.key] || 0;
+      total += q.type === 'effect' ? raw * w : -raw * w;
+    });
+    scores[drug] = total;
+  }
+  const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0][1], min = sorted[sorted.length-1][1], range = max-min||1;
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+  sorted.forEach(([name, sc], i) => {
+    const pct = Math.round(((sc-min)/range)*100);
+    const el = document.createElement('div');
+    el.className = 'result-item' + (i===0?' rank-1':'');
+    el.innerHTML = `
+      ${i===0?'<div class="result-top-badge"><svg style="width:12px;height:12px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Beste match</div>':''}
+      <div class="result-row">
+        <div class="result-num${i>1?' dim':''}">${i+1}</div>
+        <div>
+          <div class="result-name">${name}</div>
+        </div>
+      </div>
+      <div class="result-bar-bg"><div class="result-bar${i>2?' dim':''}" style="width:${pct}%"></div></div>
+    `;
+    list.appendChild(el);
+  });
+  goTo(2);
+}
+
+function resetQuiz() { answers={}; curQ=0; goTo(0); }
+</script>
+</body>
+</html>
